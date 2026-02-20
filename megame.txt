@@ -1,0 +1,163 @@
+-- SERVICES
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+-- REMOVE OLD
+pcall(function()
+	if game.CoreGui:FindFirstChild("ChiiHauu") then
+		game.CoreGui.ChiiHauu:Destroy()
+	end
+end)
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ChiiHauu"
+ScreenGui.Parent = game.CoreGui
+
+-- OPEN BUTTON
+local OpenButton = Instance.new("TextButton", ScreenGui)
+OpenButton.Size = UDim2.new(0,60,0,60)
+OpenButton.Position = UDim2.new(0.05,0,0.4,0)
+OpenButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+OpenButton.Text = "☰"
+OpenButton.TextScaled = true
+OpenButton.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1,0)
+
+-- MAIN FRAME 
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0,600,0,90)
+MainFrame.AnchorPoint = Vector2.new(0.5,0.5)
+MainFrame.Position = UDim2.new(0.5,0,0.5,0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+MainFrame.Visible = false
+MainFrame.Active = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,20)
+-- ===== LEVEL FRAME =====
+local LevelFrame = Instance.new("Frame")
+LevelFrame.Size = UDim2.new(0,180,0,70)
+LevelFrame.BackgroundColor3 = Color3.fromRGB(45,45,45)
+LevelFrame.Parent = MainFrame
+Instance.new("UICorner", LevelFrame).CornerRadius = UDim.new(0,15)
+
+local LevelText = Instance.new("TextLabel")
+LevelText.Size = UDim2.new(1,0,0.5,0)
+LevelText.BackgroundTransparency = 1
+LevelText.Text = "Level: 1"
+LevelText.TextScaled = true
+LevelText.TextColor3 = Color3.new(1,1,1)
+LevelText.Parent = LevelFrame
+
+local ExpText = Instance.new("TextLabel")
+ExpText.Size = UDim2.new(1,0,0.5,0)
+ExpText.Position = UDim2.new(0,0,0.5,0)
+ExpText.BackgroundTransparency = 1
+ExpText.Text = "Exp: 0 / 100"
+ExpText.TextScaled = true
+ExpText.TextColor3 = Color3.new(0.8,0.8,0.8)
+ExpText.Parent = LevelFrame
+-- ===== UPDATE LEVEL GUI =====
+local player = Players.LocalPlayer
+
+local function UpdateLevel()
+	if player:FindFirstChild("leaderstats") then
+		local level = player.leaderstats:FindFirstChild("Level")
+		local exp = player.leaderstats:FindFirstChild("Exp")
+		
+		if level and exp then
+			LevelText.Text = "Level: "..level.Value
+			ExpText.Text = "Exp: "..exp.Value.." / "..(level.Value * 100)
+		end
+	end
+end
+
+player.ChildAdded:Connect(function(child)
+	if child.Name == "leaderstats" then
+		UpdateLevel()
+	end
+end)
+
+task.spawn(function()
+	while true do
+		UpdateLevel()
+		task.wait(0.5)
+	end
+end)
+
+-- UI LIST LAYOUT
+local UIListLayout = Instance.new("UIListLayout", MainFrame)
+UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+UIListLayout.Padding = UDim.new(0,15)
+
+-- DRAG
+local dragging = false
+local dragStart
+local startPos
+
+MainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		
+		dragging = true
+		dragStart = input.Position
+		startPos = MainFrame.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and (
+		input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch
+	) then
+		
+		local delta = input.Position - dragStart
+		
+		MainFrame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- OPEN / CLOSE
+OpenButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- TOGGLE FUNCTION
+local function CreateToggle(name)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0,120,0,50)
+	btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+	btn.Text = name.." : OFF"
+	btn.TextScaled = true
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Parent = MainFrame
+	
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,15)
+	
+	local state = false
+	
+	btn.MouseButton1Click:Connect(function()
+		state = not state
+		btn.Text = name.." : "..(state and "ON" or "OFF")
+		btn.BackgroundColor3 = state and Color3.fromRGB(0,170,0) or Color3.fromRGB(50,50,50)
+	end)
+end
+
+-- BUTTONS
+CreateToggle("Auto Farm")
+CreateToggle("Fast Attack")
+CreateToggle("Gom Quái")
+CreateToggle("Auto Haki")
+
