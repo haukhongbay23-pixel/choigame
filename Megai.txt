@@ -1,0 +1,90 @@
+-- SERVICES
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- REMOVE OLD
+pcall(function()
+	if game.CoreGui:FindFirstChild("ChiiHauu") then
+		game.CoreGui.ChiiHauu:Destroy()
+	end
+end)
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ChiiHauu"
+ScreenGui.Parent = game.CoreGui
+
+-- OPEN BUTTON
+local OpenButton = Instance.new("TextButton", ScreenGui)
+OpenButton.Size = UDim2.new(0,60,0,60)
+OpenButton.Position = UDim2.new(0.05,0,0.4,0)
+OpenButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+OpenButton.Text = "☰"
+OpenButton.TextScaled = true
+OpenButton.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1,0)
+
+-- MAIN FRAME (CENTER)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0,320,0,360)
+MainFrame.AnchorPoint = Vector2.new(0.5,0.5)
+MainFrame.Position = UDim2.new(0.5,0,0.5,0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+MainFrame.Visible = false
+MainFrame.Active = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,15)
+
+-- DRAG BAR
+local DragBar = Instance.new("Frame", MainFrame)
+DragBar.Size = UDim2.new(1,0,0,35)
+DragBar.BackgroundColor3 = Color3.fromRGB(25,25,25)
+DragBar.BorderSizePixel = 0
+Instance.new("UICorner", DragBar).CornerRadius = UDim.new(0,15)
+
+-- DRAG SYSTEM
+local dragging = false
+local dragStart
+local startPos
+
+DragBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = MainFrame.Position
+		
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		MainFrame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- OPEN CLOSE
+OpenButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- TITLE
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1,0,0,40)
+Title.Position = UDim2.new(0,0,0.2,0)
+Title.BackgroundTransparency = 1
+Title.Text = "⚡ CHII HAUU HUB ⚡"
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.TextColor3 = Color3.fromRGB(0,255,150)
